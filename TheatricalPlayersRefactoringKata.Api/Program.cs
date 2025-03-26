@@ -9,15 +9,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "TheatricalPlayersRefactoringKata API", 
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "TheatricalPlayersRefactoringKata API",
         Version = "v1",
         Description = "API para processamento de extratos teatrais."
     });
     c.ExampleFilters();
 });
-
 
 builder.Services.AddSwaggerExamplesFromAssemblyOf<StatementRequestExample>();
 
@@ -36,3 +35,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+public partial class Program { }
