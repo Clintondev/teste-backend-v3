@@ -14,10 +14,15 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.0" />
+
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TheatricalPlayersRefactoringKata\TheatricalPlayersRefactoringKata.csproj" />
+    <ProjectReference
+      Include="..\TheatricalPlayersRefactoringKata\TheatricalPlayersRefactoringKata.csproj" />
+    <ProjectReference
+      Include="..\TheatricalPlayersRefactoringKata.Api\TheatricalPlayersRefactoringKata.Api.csproj" />
   </ItemGroup>
 
 </Project>
