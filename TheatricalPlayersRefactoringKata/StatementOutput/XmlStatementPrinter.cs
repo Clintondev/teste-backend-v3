@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml.Linq;
+using TheatricalPlayersRefactoringKata;
 using TheatricalPlayersRefactoringKata.Pricing;
 
 namespace TheatricalPlayersRefactoringKata.StatementOutput
 {
-    public class XmlStatementPrinter
+    public class XmlStatementPrinter : IStatementPrinter
     {
         public string Print(Invoice invoice, Dictionary<string, Play> plays)
         {
@@ -26,7 +27,7 @@ namespace TheatricalPlayersRefactoringKata.StatementOutput
                 totalAmount += amount;
                 totalCredits += credits;
 
-                decimal displayAmount = amount / 100m; 
+                decimal displayAmount = amount / 100m;
 
                 items.Add(
                     new XElement("Item",

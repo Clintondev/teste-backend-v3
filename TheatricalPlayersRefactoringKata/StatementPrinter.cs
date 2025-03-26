@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using TheatricalPlayersRefactoringKata.Pricing;
+using TheatricalPlayersRefactoringKata.StatementOutput;
 
 namespace TheatricalPlayersRefactoringKata
 {
-    public class StatementPrinter
+    public class StatementPrinter : IStatementPrinter
     {
+        private readonly PriceCalculatorFactory _calculatorFactory = new PriceCalculatorFactory();
+
         public string Print(Invoice invoice, Dictionary<string, Play> plays)
         {
             int totalAmount = 0;
@@ -17,13 +20,13 @@ namespace TheatricalPlayersRefactoringKata
             foreach (var perf in invoice.Performances)
             {
                 var play = plays[perf.PlayId];
-                var calculator = GetPriceCalculator(play.Type);
+                var calculator = _calculatorFactory.Create(play.Type);
 
                 int thisAmount = calculator.CalculateAmount(perf, play);
                 int perfCredits = calculator.CalculateVolumeCredits(perf, play);
 
                 volumeCredits += perfCredits;
-                
+
                 result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n",
                     play.Name, thisAmount / 100m, perf.Audience);
                 totalAmount += thisAmount;
@@ -31,22 +34,6 @@ namespace TheatricalPlayersRefactoringKata
             result += String.Format(cultureInfo, "Amount owed is {0:C}\n", totalAmount / 100m);
             result += String.Format("You earned {0} credits\n", volumeCredits);
             return result;
-        }
-
-
-        private IPriceCalculator GetPriceCalculator(string playType)
-        {
-            switch (playType)
-            {
-                case "tragedy":
-                    return new TragedyPriceCalculator();
-                case "comedy":
-                    return new ComedyPriceCalculator();
-                case "history":
-                    return new HistoryPriceCalculator();
-                default:
-                    throw new Exception("unknown type: " + playType);
-            }
         }
     }
 }
