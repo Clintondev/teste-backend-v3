@@ -4,36 +4,47 @@ using TheatricalPlayersRefactoringKata.Api.Examples;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "TheatricalPlayersRefactoringKata API",
-        Version = "v1",
-        Description = "API para processamento de extratos teatrais."
-    });
-    c.ExampleFilters();
-});
-
-builder.Services.AddSwaggerExamplesFromAssemblyOf<StatementRequestExample>();
+ConfigureServices(builder.Services);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+ConfigurePipeline(app);
+
+app.Run();
+
+static void ConfigureServices(IServiceCollection services)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    services.AddControllers();
+    services.AddEndpointsApiExplorer();
+
+    services.AddSwaggerGen(options =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "TheatricalPlayersRefactoringKata API V1");
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "TheatricalPlayersRefactoringKata API",
+            Version = "v1",
+            Description = "API para processamento de extratos teatrais."
+        });
+        options.ExampleFilters();
     });
+
+    services.AddSwaggerExamplesFromAssemblyOf<StatementRequestExample>();
 }
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
-app.Run();
+static void ConfigurePipeline(WebApplication app)
+{
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "TheatricalPlayersRefactoringKata API V1");
+        });
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+}
 
 public partial class Program { }
