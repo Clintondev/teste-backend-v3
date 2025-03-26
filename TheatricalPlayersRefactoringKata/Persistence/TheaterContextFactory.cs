@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using TheatricalPlayersRefactoringKata.Persistence; 
-using Microsoft.EntityFrameworkCore;
 
 public class TheaterContextFactory : IDesignTimeDbContextFactory<TheaterContext>
 {

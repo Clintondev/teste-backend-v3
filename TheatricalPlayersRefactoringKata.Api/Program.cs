@@ -1,50 +1,50 @@
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Filters;
 using TheatricalPlayersRefactoringKata.Api.Examples;
+using TheatricalPlayersRefactoringKata.AsyncProcessing;
+using TheatricalPlayersRefactoringKata.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-ConfigureServices(builder.Services);
+builder.Services.AddDbContext<TheaterContext>(options =>
+    options.UseSqlite("Data Source=theater.db"));
+
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepositoryEF>();
+
+builder.Services.AddSingleton<AsyncStatementProcessor>();
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "TheatricalPlayersRefactoringKata API",
+        Version = "v1",
+        Description = "API para processamento de extratos teatrais."
+    });
+    options.ExampleFilters();
+});
+
+builder.Services.AddSwaggerExamplesFromAssemblyOf<StatementRequestExample>();
 
 var app = builder.Build();
 
-ConfigurePipeline(app);
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "TheatricalPlayersRefactoringKata API V1");
+    });
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
-
-static void ConfigureServices(IServiceCollection services)
-{
-    services.AddControllers();
-    services.AddEndpointsApiExplorer();
-
-    services.AddSwaggerGen(options =>
-    {
-        options.SwaggerDoc("v1", new OpenApiInfo
-        {
-            Title = "TheatricalPlayersRefactoringKata API",
-            Version = "v1",
-            Description = "API para processamento de extratos teatrais."
-        });
-        options.ExampleFilters();
-    });
-
-    services.AddSwaggerExamplesFromAssemblyOf<StatementRequestExample>();
-}
-
-static void ConfigurePipeline(WebApplication app)
-{
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
-        {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "TheatricalPlayersRefactoringKata API V1");
-        });
-    }
-
-    app.UseHttpsRedirection();
-    app.UseAuthorization();
-    app.MapControllers();
-}
 
 public partial class Program { }

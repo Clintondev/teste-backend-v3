@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using TheatricalPlayersRefactoringKata.StatementOutput;
+using Microsoft.Extensions.DependencyInjection;
+using TheatricalPlayersRefactoringKata.Persistence;
 
 namespace TheatricalPlayersRefactoringKata.AsyncProcessing
 {
@@ -13,15 +13,11 @@ namespace TheatricalPlayersRefactoringKata.AsyncProcessing
         private readonly ConcurrentQueue<(Invoice invoice, Dictionary<string, Play> plays)> _queue = new();
         private readonly CancellationTokenSource _cts = new();
         private readonly Task _processingTask;
-        
-        private readonly string _outputDirectory;
-        
-        private readonly XmlStatementPrinter _xmlPrinter = new XmlStatementPrinter();
+        private readonly IServiceProvider _serviceProvider;
 
-        public AsyncStatementProcessor(string outputDirectory)
+        public AsyncStatementProcessor(IServiceProvider serviceProvider)
         {
-            _outputDirectory = outputDirectory;
-            Directory.CreateDirectory(_outputDirectory);
+            _serviceProvider = serviceProvider;
             _processingTask = Task.Run(ProcessQueueAsync);
         }
 
@@ -38,23 +34,20 @@ namespace TheatricalPlayersRefactoringKata.AsyncProcessing
                 {
                     try
                     {
+                        using (var scope = _serviceProvider.CreateScope())
+                        {
+                            var invoiceRepository = scope.ServiceProvider.GetRequiredService<IInvoiceRepository>();
 
-                        var xmlContent = _xmlPrinter.Print(item.invoice, item.plays);
-                        
-
-                        var fileName = Path.Combine(_outputDirectory, $"Statement_{DateTime.Now:yyyyMMdd_HHmmssfff}.xml");
-                        
-                        await File.WriteAllTextAsync(fileName, xmlContent);
+                            await invoiceRepository.SaveStatementAsync(item.invoice, item.plays);
+                        }
                     }
                     catch (Exception ex)
                     {
-
                         Console.WriteLine($"Erro ao processar o extrato: {ex.Message}");
                     }
                 }
                 else
                 {
-
                     await Task.Delay(500, _cts.Token);
                 }
             }

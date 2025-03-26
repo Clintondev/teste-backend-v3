@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using TheatricalPlayersRefactoringKata;
 using TheatricalPlayersRefactoringKata.AsyncProcessing;
+using TheatricalPlayersRefactoringKata.Persistence;
 using Swashbuckle.AspNetCore.Filters;
-using TheatricalPlayersRefactoringKata.Api.Examples; 
+using TheatricalPlayersRefactoringKata.Api.Examples;
 
 namespace TheatricalPlayersRefactoringKata.Api.Controllers
 {
@@ -11,12 +12,15 @@ namespace TheatricalPlayersRefactoringKata.Api.Controllers
     [Route("api/[controller]")]
     public class StatementController : ControllerBase
     {
-        private static readonly AsyncStatementProcessor _processor = new AsyncStatementProcessor("ExtratosXML");
+        private readonly AsyncStatementProcessor _processor;
+        private readonly TheaterContext _context;
 
-        /// <summary>
-        /// </summary>
-        /// <param name="request">Os dados da fatura e o dicionário de peças.</param>
-        /// <returns>Status de aceitação.</returns>
+        public StatementController(AsyncStatementProcessor processor, TheaterContext context)
+        {
+            _processor = processor;
+            _context = context;
+        }
+
         [HttpPost]
         [SwaggerRequestExample(typeof(StatementRequest), typeof(StatementRequestExample))]
         public IActionResult PostStatement([FromBody] StatementRequest request)
@@ -33,8 +37,8 @@ namespace TheatricalPlayersRefactoringKata.Api.Controllers
         [HttpGet]
         public IActionResult GetStatements()
         {
-            var files = System.IO.Directory.GetFiles("ExtratosXML", "*.xml");
-            return Ok(files);
+            var invoices = _context.Invoices.Include(i => i.Performances).ToList();
+            return Ok(invoices);
         }
     }
 
